@@ -7,8 +7,6 @@ names(data)[1] <- "y"
 data[,-1] <- scale(data[,-1])
 data <- as.data.frame(data)
 
-
-
 # adaptive wasserstein subsampling
 library(cluster)
 library(caret)
@@ -34,14 +32,9 @@ for(i in 1:n.sampling.step){
   # OT to find k best
   pamdata = pam(exp((scale(step.data)))^(n.sampling.step/i), k = k, metric = "manhattan")
   subdata = rbind(subdata, record.data[pamdata$id.med,])   # all available data up to this round
-  #ymax = max(abs(subdata[,1]))
-  #ssubdata = subdata
-  #ssubdata[,1] = ssubdata[,1]/ymax
-  #print(dim(ssubdata)[1])
-  #fit = lm(y~., data = ssubdata)
+
   fit = train(y = subdata[,1], x = subdata[,-1], tuneGrid = data.frame(mtry = 1:5), method = "rf",
               ntree = 1000,
-              #trControl = trainControl(method = "repeatedcv", repeats=10, number=10))
               trControl = trainControl(method = "oob"))
   test.rmse[i] = sqrt(mean((predict(fit,test)-test[,1])^2))
   print(test.rmse[i])
@@ -51,15 +44,13 @@ for(i in 1:n.sampling.step){
 }
 
 
-OT.data = train[pam(exp(scale(train)), k = m)$id.med,]
-#OT.fit = lm(y~., data = OT.data)
+OT.data = train[pam(train[,-1], k = m)$id.med,]
 OT.fit = train(y = OT.data[,1], x = OT.data[,-1], tuneGrid = data.frame(mtry = 1:5), method = "rf",
             ntree = 1000, trControl = trainControl(method = "oob"))
 OT.rmse = sqrt(mean((predict(OT.fit,test)-test[,1])^2))
 OT.rmse
 
 rand.data = train[sample(n.train,m),]
-#rand.fit = lm(y~., data = rand.data)
 rand.fit = train(y = rand.data[,1], x = rand.data[,-1], tuneGrid = data.frame(mtry = 1:5), method = "rf",
             ntree = 1000, trControl = trainControl(method = "oob"))
 rand.rmse = sqrt(mean((predict(rand.fit,test)-test[,1])^2))
