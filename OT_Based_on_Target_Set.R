@@ -49,8 +49,7 @@ for(i in 1:(n.sampling.step+1)){
   subdata = rbind(subdata, record.data[pamdata$id.med,])   # all available data up to this round
 
   fit = train(y = subdata[,1], x = subdata[,-1], tuneGrid = data.frame(mtry = 1:5), method = "rf",
-              ntree = 1000,
-              trControl = trainControl(method = "oob"))
+              ntree = 1000, trControl = trainControl(method = "oob"))
   test.rmse[i] = sqrt(mean((predict(fit,test)-test[,1])^2))
   print(test.rmse[i])
   record.data = record.data[-pamdata$id.med,]
