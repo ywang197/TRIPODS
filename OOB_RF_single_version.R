@@ -22,7 +22,9 @@ n.seq.smpl = B - n.rnd.smpl
   
 test.rmse = vector()
 test.rmse.rand = vector()
-  
+
+# initial RF -> OOB error -> new reponse RF -> assign weight to unseen data for sampling
+
 for(t in 1:100){
   print(t)
   train.index = sample(n,n.train)
@@ -31,7 +33,6 @@ for(t in 1:100){
   seq.pool = train[-(1:n.rnd.smpl),] # to draw n.seq.smpl points from seq.pool
   test = data[-train.index,]
     
-  # initial RF -> OOB error -> new reponse RF -> assign weight to unseen data for sampling
   fit.rnd.smpl = train(y=rnd.smpl[,1], x=rnd.smpl[,-1], tuneGrid=data.frame(mtry=1:8), method="rf",
                        ntree=1000, trControl=trainControl(method="oob"))
   
